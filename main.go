@@ -12,16 +12,16 @@ import (
 )
 
 func main() {
-	godotenv.Load()
+	godotenv.Load() // used to bring the env vars from .env file to here
 
 	portString := os.Getenv("PORT")
-
 	if portString == "" {
 		log.Fatal("Port is not bound in the environment")
 	}
 
 	router := chi.NewRouter()
 
+	// cors config to allow the requests in our browser to connect with the backend
 	router.Use(cors.Handler(cors.Options{
 		AllowedOrigins:   []string{"https://*", "http://*"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
@@ -32,11 +32,10 @@ func main() {
 	}))
 
 	v1Router := chi.NewRouter()
-
 	v1Router.Get("/healthz", handlerReadiness)
 	v1Router.Get("/error", handlerError)
 
-	router.Mount("/v1", v1Router)
+	router.Mount("/v1", v1Router) // good practice to have this setup, so that you can migrate to v2 easily
 
 	srv := &http.Server{
 		Handler: router,
@@ -44,10 +43,8 @@ func main() {
 	}
 
 	log.Printf("Server starting on port %v", portString)
-	err := srv.ListenAndServe()
+	err := srv.ListenAndServe() // this line creates the process which runs the go server
 	if err != nil {
-		log.Fatal(err)
+		log.Fatal(err) // in idea scenario, this won't hit, that means good thing for the dev
 	}
-
-	fmt.Println("Port:", portString)
 }
